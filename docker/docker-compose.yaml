@@ -9,6 +9,26 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME} -d ${POSTGRES_STORENAME}"]
+      interval: 2s
+      timeout: 3s
+      retries: 5
+    networks:
+      - goapp_network
+
+  migrate:
+    image: migrate/migrate:v4.18.2
+    volumes:
+      - ../db/migrations:/migrations
+    entrypoint:
+      - migrate
+      - -path=/migrations
+      - -database=postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_STORENAME}?sslmode=${POSTGRES_SSLMODE}
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - goapp_network
 
@@ -20,7 +40,6 @@ services:
       ENV: ${ENV}
       APP_NAME: ${APP_NAME}
       APP_VERSION: ${APP_VERSION}
-      JWT_SECRET: ${JWT_SECRET}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_STORENAME: ${POSTGRES_STORENAME}
@@ -34,7 +53,10 @@ services:
       - '2000:2000'
       - '9090:9090'
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - goapp_network
 
