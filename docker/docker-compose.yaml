@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: 'postgres:17'
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_DB: ${POSTGRES_STORENAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - goapp_network
+
+  goapp:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    environment:
+      ENV: ${ENV}
+      APP_NAME: ${APP_NAME}
+      APP_VERSION: ${APP_VERSION}
+      JWT_SECRET: ${JWT_SECRET}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_STORENAME: ${POSTGRES_STORENAME}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_SSLMODE: ${POSTGRES_SSLMODE}
+      ENABLE_METRICS: ${ENABLE_METRICS}
+      ENABLE_TRACING: ${ENABLE_TRACING}
+    ports:
+      - '8080:8080'
+      - '2000:2000'
+      - '9090:9090'
+    depends_on:
+      - postgres
+    networks:
+      - goapp_network
+
+networks:
+  goapp_network:
+
+volumes:
+  postgres_data:
