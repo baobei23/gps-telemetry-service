@@ -34,11 +34,16 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		start := time.Now()
 		rec := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(rec, r)
-		slog.InfoContext(r.Context(), "http request",
+
+		attrs := []any{
 			"method", r.Method,
 			"path", r.URL.Path,
 			"status", rec.statusCode,
 			"duration", time.Since(start).String(),
-		)
+		}
+		if deviceID := r.URL.Query().Get("id"); deviceID != "" {
+			attrs = append(attrs, "deviceId", deviceID)
+		}
+		slog.InfoContext(r.Context(), "http request", attrs...)
 	})
 }

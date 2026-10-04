@@ -31,7 +31,7 @@ COPY --from=builder /app/appbin /home/appuser/app/appbin
 WORKDIR /home/appuser/app
 
 ENV TZ=Asia/Jakarta
-# Expose ports: 8080 (HTTP), 2000 (Health), 9090 (Metrics)
-EXPOSE 8080 2000 9090
+# Expose ports: 5055 (OsmAnd Ingestion/HTTP), 8080 (HTTP Alt), 2000 (Health), 9090 (Metrics)
+EXPOSE 5055 8080 2000 9090
 
 CMD ["./appbin"]

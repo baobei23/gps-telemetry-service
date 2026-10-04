@@ -2,16 +2,16 @@ package http
 
 import (
 	"net/http"
+
+	"gps-telemetry-service/internal/telemetry"
 )
 
 // Handlers struct has all the dependencies required for HTTP handlers
-type Handlers struct{}
-
-func (h *Handlers) registerRoutes(mux *http.ServeMux) {
-	// root
-	mux.HandleFunc("GET /{$}", h.HelloWorld)
+type Handlers struct {
+	telemetry *telemetry.Service
 }
 
-func (h *Handlers) HelloWorld(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, "hello world")
+func (h *Handlers) registerRoutes(mux *http.ServeMux) {
+	// OsmAnd telemetry ingestion
+	mux.HandleFunc("GET /{$}", h.IngestPosition)
 }
