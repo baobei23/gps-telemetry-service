@@ -1,163 +1,9 @@
 basePath: /
 definitions:
-  github_com_baobei23_goapp_cmd_server_http.BaseResponse:
-    properties:
-      data: {}
-      meta: {}
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.ErrorResponse:
+  http.ErrorResponse:
     properties:
       error:
         example: Something went wrong
-        type: string
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.LoginResponse:
-    properties:
-      accessToken:
-        type: string
-      expiresIn:
-        type: integer
-      user:
-        $ref: '#/definitions/users.User'
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.RefreshTokenRequest:
-    properties:
-      refreshToken:
-        type: string
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.RefreshTokenResponse:
-    properties:
-      accessToken:
-        type: string
-      expiresIn:
-        type: integer
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.RegisterNoteRequest:
-    properties:
-      content:
-        type: string
-      title:
-        type: string
-    required:
-    - content
-    - title
-    type: object
-  github_com_baobei23_goapp_cmd_server_http.RegisterRequest:
-    properties:
-      email:
-        maxLength: 255
-        type: string
-      fullName:
-        maxLength: 255
-        type: string
-      password:
-        minLength: 8
-        type: string
-    required:
-    - email
-    - fullName
-    - password
-    type: object
-  server_http.BaseResponse:
-    properties:
-      data: {}
-      meta: {}
-    type: object
-  server_http.ErrorResponse:
-    properties:
-      error:
-        example: Something went wrong
-        type: string
-    type: object
-  server_http.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  server_http.LoginResponse:
-    properties:
-      accessToken:
-        type: string
-      expiresIn:
-        type: integer
-      user:
-        $ref: '#/definitions/users.User'
-    type: object
-  server_http.RefreshTokenRequest:
-    properties:
-      refreshToken:
-        type: string
-    type: object
-  server_http.RefreshTokenResponse:
-    properties:
-      accessToken:
-        type: string
-      expiresIn:
-        type: integer
-    type: object
-  server_http.RegisterNoteRequest:
-    properties:
-      content:
-        type: string
-      title:
-        type: string
-    required:
-    - content
-    - title
-    type: object
-  server_http.RegisterRequest:
-    properties:
-      email:
-        maxLength: 255
-        type: string
-      fullName:
-        maxLength: 255
-        type: string
-      password:
-        minLength: 8
-        type: string
-    required:
-    - email
-    - fullName
-    - password
-    type: object
-  usernotes.Note:
-    properties:
-      content:
-        type: string
-      createdAt:
-        type: string
-      id:
-        type: string
-      title:
-        type: string
-      updatedAt:
-        type: string
-      userID:
-        type: string
-    type: object
-  users.User:
-    properties:
-      email:
-        type: string
-      fullName:
-        type: string
-      id:
         type: string
     type: object
 info:
@@ -165,313 +11,82 @@ info:
     email: reginaldsaja98@gmail.com
     name: API Support
     url: https://github.com/baobei23
-  description: API for GoApp
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: GoApp API
+  description: HTTP API for ingesting GPS positions using the Traccar OsmAnd query
+    parameter format.
+  title: GPS Telemetry Ingestion API
+  version: 1.0.0
 paths:
-  /auth/logout:
-    post:
-      consumes:
-      - application/json
-      description: Logout by revoking refresh token
-      parameters:
-      - description: Refresh Token Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.RefreshTokenRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-      summary: Logout
-      tags:
-      - Auth
-  /auth/refresh:
-    post:
-      consumes:
-      - application/json
-      description: Use valid refresh token to get new access token pair
-      parameters:
-      - description: Refresh Token Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.RefreshTokenRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.RefreshTokenResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-      summary: Refresh Access Token
-      tags:
-      - Auth
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Login
-      parameters:
-      - description: Login Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.LoginResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-      summary: Login
-      tags:
-      - Auth
-  /register:
-    post:
-      consumes:
-      - application/json
-      description: Register a new user
-      parameters:
-      - description: Register Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.RegisterRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/users.User'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-      summary: Register a new user
-      tags:
-      - Auth
-  /usernotes:
-    post:
-      consumes:
-      - application/json
-      description: Create a new note for the authenticated user
-      parameters:
-      - description: Note Payload
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/server_http.RegisterNoteRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/server_http.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/server_http.RegisterNoteRequest'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server_http.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/server_http.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server_http.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Create User Note
-      tags:
-      - Notes
-  /usernotes/{noteID}:
+  /:
     get:
-      consumes:
-      - application/json
-      description: Read a user note
+      description: Accepts a GPS position as OsmAnd query parameters. A successful
+        request is acknowledged with an empty 200 response after the position has
+        been persisted. Repeated device ID and timestamp pairs are ignored.
       parameters:
-      - description: Note ID
-        in: path
-        name: noteID
+      - description: Device identifier (up to 32 characters)
+        in: query
+        name: id
         required: true
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/server_http.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/usernotes.Note'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server_http.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/server_http.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server_http.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Read User Note
-      tags:
-      - Notes
-  /users:
-    get:
-      consumes:
-      - application/json
-      description: Read User By ID
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/users.User'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Read User By ID
-      tags:
-      - Users
-  /users/password:
-    put:
-      consumes:
-      - application/json
-      description: Change Password
-      parameters:
-      - description: Passwords
-        in: body
-        name: body
+      - description: Device timestamp as Unix epoch seconds
+        format: int64
+        in: query
+        name: timestamp
         required: true
-        schema:
-          properties:
-            new_password:
-              type: string
-            old_password:
-              type: string
-          type: object
-      produces:
-      - application/json
+        type: integer
+      - description: Latitude in decimal degrees (-90 to 90)
+        in: query
+        name: lat
+        required: true
+        type: number
+      - description: Longitude in decimal degrees (-180 to 180)
+        in: query
+        name: lon
+        required: true
+        type: number
+      - description: Position validity (0 or 1; defaults to 1)
+        in: query
+        name: valid
+        type: integer
+      - description: Speed in knots (non-negative)
+        in: query
+        name: speed
+        type: number
+      - description: Bearing in degrees (0 to 360)
+        in: query
+        name: bearing
+        type: number
+      - description: Altitude in metres
+        in: query
+        name: altitude
+        type: number
+      - description: Horizontal accuracy in metres (non-negative)
+        in: query
+        name: accuracy
+        type: number
+      - description: Horizontal dilution of precision (non-negative)
+        in: query
+        name: hdop
+        type: number
+      - description: Battery level (0 to 100)
+        in: query
+        name: batt
+        type: number
+      - description: Whether the device is charging
+        in: query
+        name: charge
+        type: boolean
       responses:
         "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse'
+          description: Position persisted or duplicate ignored; empty response body
         "400":
-          description: Bad Request
+          description: Invalid or missing query parameter
           schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
+            $ref: '#/definitions/http.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: Unexpected persistence error
           schema:
-            $ref: '#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Change Password
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Ingest a GPS position
       tags:
-      - Users
-securityDefinitions:
-  ApiKeyAuth:
-    description: Bearer token
-    in: header
-    name: Authorization
-    type: apiKey
+      - Telemetry
 swagger: "2.0"

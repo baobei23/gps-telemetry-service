@@ -15,23 +15,16 @@ import (
 	"gps-telemetry-service/internal/configs"
 )
 
-//	@title			GoApp API
-//	@description	API for GoApp
-//	@termsOfService	http://swagger.io/terms/
+//	@title			GPS Telemetry Ingestion API
+//	@version		1.0.0
+//	@description	HTTP API for ingesting GPS positions using the Traccar OsmAnd query parameter format.
+// //	@termsOfService	http://swagger.io/terms/
 
 //	@contact.name	API Support
 //	@contact.url	https://github.com/baobei23
 //	@contact.email	reginaldsaja98@gmail.com
-
-//	@license.name	Apache 2.0
-//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-
-//	@BasePath					/
 //
-//	@securityDefinitions.apikey	ApiKeyAuth
-//	@in							header
-//	@name						Authorization
-//	@description				Bearer token
+//	@BasePath		/
 
 var exitErr error
 

@@ -1,507 +1,117 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API for GoApp",
-        "title": "GoApp API",
-        "termsOfService": "http://swagger.io/terms/",
+        "description": "HTTP API for ingesting GPS positions using the Traccar OsmAnd query parameter format.",
+        "title": "GPS Telemetry Ingestion API",
         "contact": {
             "name": "API Support",
             "url": "https://github.com/baobei23",
             "email": "reginaldsaja98@gmail.com"
         },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        }
+        "version": "1.0.0"
     },
     "basePath": "/",
     "paths": {
-        "/auth/logout": {
-            "post": {
-                "description": "Logout by revoking refresh token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Logout",
-                "parameters": [
-                    {
-                        "description": "Refresh Token Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.RefreshTokenRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/refresh": {
-            "post": {
-                "description": "Use valid refresh token to get new access token pair",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Refresh Access Token",
-                "parameters": [
-                    {
-                        "description": "Refresh Token Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.RefreshTokenRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.RefreshTokenResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
-            "post": {
-                "description": "Login",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Login",
-                "parameters": [
-                    {
-                        "description": "Login Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.LoginRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.LoginResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/register": {
-            "post": {
-                "description": "Register a new user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Register a new user",
-                "parameters": [
-                    {
-                        "description": "Register Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.RegisterRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/users.User"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/usernotes": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create a new note for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Notes"
-                ],
-                "summary": "Create User Note",
-                "parameters": [
-                    {
-                        "description": "Note Payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/server_http.RegisterNoteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/server_http.RegisterNoteRequest"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server_http.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/server_http.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/usernotes/{noteID}": {
+        "/": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Read a user note",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "description": "Accepts a GPS position as OsmAnd query parameters. A successful request is acknowledged with an empty 200 response after the position has been persisted. Repeated device ID and timestamp pairs are ignored.",
                 "tags": [
-                    "Notes"
+                    "Telemetry"
                 ],
-                "summary": "Read User Note",
+                "summary": "Ingest a GPS position",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Note ID",
-                        "name": "noteID",
-                        "in": "path",
+                        "description": "Device identifier (up to 32 characters)",
+                        "name": "id",
+                        "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Device timestamp as Unix epoch seconds",
+                        "name": "timestamp",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Latitude in decimal degrees (-90 to 90)",
+                        "name": "lat",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Longitude in decimal degrees (-180 to 180)",
+                        "name": "lon",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Position validity (0 or 1; defaults to 1)",
+                        "name": "valid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Speed in knots (non-negative)",
+                        "name": "speed",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Bearing in degrees (0 to 360)",
+                        "name": "bearing",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Altitude in metres",
+                        "name": "altitude",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Horizontal accuracy in metres (non-negative)",
+                        "name": "accuracy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Horizontal dilution of precision (non-negative)",
+                        "name": "hdop",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Battery level (0 to 100)",
+                        "name": "batt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Whether the device is charging",
+                        "name": "charge",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/usernotes.Note"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                        "description": "Position persisted or duplicate ignored; empty response body"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid or missing query parameter",
                         "schema": {
-                            "$ref": "#/definitions/server_http.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/server_http.ErrorResponse"
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Unexpected persistence error",
                         "schema": {
-                            "$ref": "#/definitions/server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Read User By ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Read User By ID",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/users.User"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/password": {
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Change Password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Change Password",
-                "parameters": [
-                    {
-                        "description": "Passwords",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "new_password": {
-                                    "type": "string"
-                                },
-                                "old_password": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.BaseResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_baobei23_goapp_cmd_server_http.ErrorResponse"
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     }
                 }
@@ -509,14 +119,7 @@
         }
     },
     "definitions": {
-        "github_com_baobei23_goapp_cmd_server_http.BaseResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "meta": {}
-            }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.ErrorResponse": {
+        "http.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -524,237 +127,6 @@
                     "example": "Something went wrong"
                 }
             }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "expiresIn": {
-                    "type": "integer"
-                },
-                "user": {
-                    "$ref": "#/definitions/users.User"
-                }
-            }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.RefreshTokenRequest": {
-            "type": "object",
-            "properties": {
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.RefreshTokenResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "expiresIn": {
-                    "type": "integer"
-                }
-            }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.RegisterNoteRequest": {
-            "type": "object",
-            "required": [
-                "content",
-                "title"
-            ],
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_baobei23_goapp_cmd_server_http.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "fullName",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "fullName": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 8
-                }
-            }
-        },
-        "server_http.BaseResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "meta": {}
-            }
-        },
-        "server_http.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Something went wrong"
-                }
-            }
-        },
-        "server_http.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "server_http.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "expiresIn": {
-                    "type": "integer"
-                },
-                "user": {
-                    "$ref": "#/definitions/users.User"
-                }
-            }
-        },
-        "server_http.RefreshTokenRequest": {
-            "type": "object",
-            "properties": {
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "server_http.RefreshTokenResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "expiresIn": {
-                    "type": "integer"
-                }
-            }
-        },
-        "server_http.RegisterNoteRequest": {
-            "type": "object",
-            "required": [
-                "content",
-                "title"
-            ],
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "server_http.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "fullName",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "fullName": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 8
-                }
-            }
-        },
-        "usernotes.Note": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "userID": {
-                    "type": "string"
-                }
-            }
-        },
-        "users.User": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "fullName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                }
-            }
-        }
-    },
-    "securityDefinitions": {
-        "ApiKeyAuth": {
-            "description": "Bearer token",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }

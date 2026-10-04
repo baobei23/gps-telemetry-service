@@ -30,7 +30,7 @@ seed: seed-users seed-products
 
 .PHONY: gen-docs
 gen-docs:
-	@swag init -g ./main.go -d .,cmd,internal && swag fmt
+	@swag init -g ./main.go -d . --outputTypes json,yaml && swag fmt
 
 .PHONY: e2e
 e2e:
