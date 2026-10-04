@@ -1,5 +1,0 @@
-services:
-  simulator:
-    build: .
-    stdin_open: true
-    tty: true
