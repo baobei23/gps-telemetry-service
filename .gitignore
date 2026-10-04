@@ -1,5 +1,6 @@
-simulator
-simulator*
+/simulator
+/simulator.exe
+!simulator/
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,visualstudiocode,osx,linux,windows
