@@ -60,6 +60,18 @@ services:
     networks:
       - goapp_network
 
+  simulator:
+    build:
+      context: ../simulator
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    network_mode: "service:goapp"
+    depends_on:
+      - goapp
+    profiles:
+      - simulator
+
 networks:
   goapp_network:
 
