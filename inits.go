@@ -13,10 +13,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"gps-telemetry-service/internal/pkg/jwt"
 	"gps-telemetry-service/internal/pkg/postgres"
-	"gps-telemetry-service/internal/usernotes"
-	"gps-telemetry-service/internal/users"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel"
@@ -66,9 +63,9 @@ func setupTelemetry(cfgs *configs.Configs) *sdktrace.TracerProvider {
 	return tp
 }
 
-func startServers(userSvc *users.Users, noteSvc *usernotes.UserNotes, cfgs *configs.Configs, tm *jwt.TokenManager, fatalErr chan<- error) (*xhttp.HTTP, *grpc.GRPC) {
+func startServers(cfgs *configs.Configs, fatalErr chan<- error) (*xhttp.HTTP, *grpc.GRPC) {
 	hcfg, _ := cfgs.HTTP()
-	hserver, err := xhttp.NewService(hcfg, userSvc, noteSvc, tm)
+	hserver, err := xhttp.NewService(hcfg)
 	if err != nil {
 		fatalErr <- fmt.Errorf("failed to initialize HTTP server: %w", err)
 	}
@@ -131,13 +128,6 @@ func start(
 
 	healthServer = startHealthServer(ctx, pqdriver, isReady, fatalErr)
 
-	userPGstore := users.NewPostgresStore(pqdriver)
-	userSvc := users.NewService(userPGstore)
-
-	notePGstore := usernotes.NewPostgresStore(pqdriver)
-	noteSvc := usernotes.NewService(notePGstore)
-
-	tm := cfgs.JWT()
-	hserver, gserver = startServers(userSvc, noteSvc, cfgs, tm, fatalErr)
+	hserver, gserver = startServers(cfgs, fatalErr)
 	return
 }

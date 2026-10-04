@@ -2,21 +2,15 @@ package grpc
 
 import (
 	"context"
-
-	"gps-telemetry-service/internal/users"
 )
 
-type GRPC struct {
-	users *users.Users
-}
+type GRPC struct{}
 
 func (gr *GRPC) Shutdown(ctx context.Context) error {
 	_ = ctx
 	return nil
 }
 
-func New(userSvc *users.Users) *GRPC {
-	return &GRPC{
-		users: userSvc,
-	}
+func New() *GRPC {
+	return &GRPC{}
 }

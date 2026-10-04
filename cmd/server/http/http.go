@@ -6,10 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"gps-telemetry-service/internal/pkg/jwt"
-	"gps-telemetry-service/internal/usernotes"
-	"gps-telemetry-service/internal/users"
-
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -39,12 +35,8 @@ func (h *HTTP) Shutdown(ctx context.Context) error {
 }
 
 // NewService returns an instance of HTTP with all its dependencies set
-func NewService(cfg *Config, userSvc *users.Users, noteSvc *usernotes.UserNotes, tm *jwt.TokenManager) (*HTTP, error) {
-	handlers := &Handlers{
-		users: userSvc,
-		notes: noteSvc,
-		tm:    tm,
-	}
+func NewService(cfg *Config) (*HTTP, error) {
+	handlers := &Handlers{}
 
 	mux := http.NewServeMux()
 	handlers.registerRoutes(mux)
