@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/baobei23/goapp/internal/configs"
-	"github.com/baobei23/goapp/internal/pkg/postgres"
+	"gps-telemetry-service/internal/configs"
+	"gps-telemetry-service/internal/pkg/postgres"
 )
 
 func main() {

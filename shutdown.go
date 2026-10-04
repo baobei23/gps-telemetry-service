@@ -9,8 +9,9 @@ import (
 	"log/slog"
 	"sync/atomic"
 
-	"github.com/baobei23/goapp/cmd/server/grpc"
-	xhttp "github.com/baobei23/goapp/cmd/server/http"
+	"gps-telemetry-service/cmd/server/grpc"
+	xhttp "gps-telemetry-service/cmd/server/http"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

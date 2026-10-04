@@ -12,7 +12,7 @@ import (
 
 	"sync/atomic"
 
-	"github.com/baobei23/goapp/internal/configs"
+	"gps-telemetry-service/internal/configs"
 )
 
 //	@title			GoApp API

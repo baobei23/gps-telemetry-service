@@ -1,7 +1,7 @@
 // Package kafka implements the Kafka subscription functionality
 package kafka
 
-import "github.com/baobei23/goapp/internal/users"
+import "gps-telemetry-service/internal/users"
 
 type Kafka struct {
 	users *users.Users

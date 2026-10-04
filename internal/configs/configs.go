@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/baobei23/goapp/cmd/server/http"
-	"github.com/baobei23/goapp/internal/pkg/jwt"
-	"github.com/baobei23/goapp/internal/pkg/postgres"
+	"gps-telemetry-service/cmd/server/http"
+	"gps-telemetry-service/internal/pkg/jwt"
+	"gps-telemetry-service/internal/pkg/postgres"
 )
 
 type env string

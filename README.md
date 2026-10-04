@@ -15,14 +15,14 @@
   <p align="center">
     An opinionated guideline to structure a Go web application/service.
     <br />
-    <a href="https://github.com/baobei23/goapp"><strong>Explore the docs »</strong></a>
+    <a href="https://gps-telemetry-service"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/baobei23/goapp">View Demo</a>
+    <a href="https://gps-telemetry-service">View Demo</a>
     ·
-    <a href="https://github.com/baobei23/goapp/issues">Report Bug</a>
+    <a href="https://gps-telemetry-service/issues">Report Bug</a>
     ·
-    <a href="https://github.com/baobei23/goapp/issues">Request Feature</a>
+    <a href="https://gps-telemetry-service/issues">Request Feature</a>
   </p>
 </div>
 
@@ -443,13 +443,13 @@ export ENABLE_TRACING=false
 
 [actions-shield]:
   https://img.shields.io/github/actions/workflow/status/naughtygopher/goapp/go.yml?branch=master&style=for-the-badge
-[actions-url]: https://github.com/baobei23/goapp/actions
+[actions-url]: https://gps-telemetry-service/actions
 [godoc-shield]:
   https://img.shields.io/badge/godoc-reference-blue?style=for-the-badge&logo=go&logoColor=white
-[godoc-url]: http://godoc.org/github.com/baobei23/goapp
+[godoc-url]: http://godoc.org/gps-telemetry-service
 [license-shield]:
   https://img.shields.io/github/license/baobei23/goapp.svg?style=for-the-badge
-[license-url]: https://github.com/baobei23/goapp/blob/main/LICENSE
+[license-url]: https://gps-telemetry-service/blob/main/LICENSE
 [linkedin-shield]:
   https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white
 [linkedin-url]: https://linkedin.com/in/ahmadreginald

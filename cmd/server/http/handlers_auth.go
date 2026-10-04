@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baobei23/goapp/internal/users"
+	"gps-telemetry-service/internal/users"
 )
 
 type RegisterRequest struct {

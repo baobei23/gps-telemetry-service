@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 
-	"github.com/baobei23/goapp/internal/users"
+	"gps-telemetry-service/internal/users"
 )
 
 type GRPC struct {

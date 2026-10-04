@@ -1,4 +1,4 @@
-module github.com/baobei23/goapp
+module gps-telemetry-service
 
 go 1.27.1
 

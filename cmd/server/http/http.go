@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/baobei23/goapp/internal/pkg/jwt"
-	"github.com/baobei23/goapp/internal/usernotes"
-	"github.com/baobei23/goapp/internal/users"
+	"gps-telemetry-service/internal/pkg/jwt"
+	"gps-telemetry-service/internal/usernotes"
+	"gps-telemetry-service/internal/users"
+
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 

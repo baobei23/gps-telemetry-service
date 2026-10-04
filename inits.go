@@ -7,15 +7,16 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/baobei23/goapp/cmd/server/grpc"
-	xhttp "github.com/baobei23/goapp/cmd/server/http"
-	"github.com/baobei23/goapp/internal/configs"
+	"gps-telemetry-service/cmd/server/grpc"
+	xhttp "gps-telemetry-service/cmd/server/http"
+	"gps-telemetry-service/internal/configs"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/baobei23/goapp/internal/pkg/jwt"
-	"github.com/baobei23/goapp/internal/pkg/postgres"
-	"github.com/baobei23/goapp/internal/usernotes"
-	"github.com/baobei23/goapp/internal/users"
+	"gps-telemetry-service/internal/pkg/jwt"
+	"gps-telemetry-service/internal/pkg/postgres"
+	"gps-telemetry-service/internal/usernotes"
+	"gps-telemetry-service/internal/users"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel"

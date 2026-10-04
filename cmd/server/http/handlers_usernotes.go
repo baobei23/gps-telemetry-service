@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/baobei23/goapp/internal/usernotes"
+	"gps-telemetry-service/internal/usernotes"
 )
 
 type RegisterNoteRequest struct {
