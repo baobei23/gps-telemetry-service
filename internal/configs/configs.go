@@ -34,7 +34,7 @@ type Configs struct {
 // HTTP returns the configuration required for HTTP package
 func (cfg *Configs) HTTP() (*http.Config, error) {
 	return &http.Config{
-		EnableAccessLog: (cfg.Environment == EnvLocal) || (cfg.Environment == EnvTest),
+		EnableAccessLog: true,
 		Port:            5055,
 		ReadTimeout:     time.Second * 5,
 		WriteTimeout:    time.Second * 5,
