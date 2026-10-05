@@ -34,7 +34,8 @@ func setupTelemetry(cfgs *configs.Configs) *sdktrace.TracerProvider {
 			port := 9090
 			mux := http.NewServeMux()
 			mux.Handle("/-/metrics", promhttp.Handler())
-			slog.Info(fmt.Sprintf("[otel/http] starting prometheus metrics on :%d/-/metrics", port))
+			mux.Handle("/metrics", promhttp.Handler())
+			slog.Info(fmt.Sprintf("[otel/http] starting prometheus metrics on :%d/-/metrics and :%d/metrics", port, port))
 			_ = http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 		}()
 	}

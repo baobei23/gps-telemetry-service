@@ -59,6 +59,8 @@ func NewService(cfg *Config, telemetrySvc *telemetry.Service, isReady *atomic.Bo
 		handler = loggingMiddleware(handler)
 	}
 
+	handler = metricsMiddleware(handler)
+
 	handler = requestIDMiddleware(handler)
 
 	srv := &http.Server{

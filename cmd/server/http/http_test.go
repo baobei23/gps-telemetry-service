@@ -472,3 +472,40 @@ func TestHealthReady_DatabaseError(t *testing.T) {
 		t.Fatalf("expected 503, got %d", rec.Code)
 	}
 }
+
+func TestNormalizePath(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"/", "/"},
+		{"/health/live", "/health/live"},
+		{"/api/devices", "/api/devices"},
+		{"/api/devices/357565514000001", "/api/devices/:id"},
+		{"/api/devices/357565514000001/latest", "/api/devices/:id/latest"},
+		{"/api/devices/357565514000001/positions", "/api/devices/:id/positions"},
+	}
+
+	for _, tc := range tests {
+		got := normalizePath(tc.input)
+		if got != tc.want {
+			t.Errorf("normalizePath(%q) = %q, want %q", tc.input, got, tc.want)
+		}
+	}
+}
+
+func TestMetricsMiddleware(t *testing.T) {
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	handler := metricsMiddleware(inner)
+	req := httptest.NewRequest(http.MethodGet, "/api/devices/357565514000001/latest", nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+}
