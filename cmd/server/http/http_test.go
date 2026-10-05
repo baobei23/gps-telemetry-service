@@ -3,8 +3,10 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -16,6 +18,11 @@ type mockTelemetryStore struct {
 	devices  []telemetry.DeviceSummary
 	latest   map[string]*telemetry.Position
 	history  map[string][]telemetry.Position
+	pingErr  error
+}
+
+func (m *mockTelemetryStore) Ping(ctx context.Context) error {
+	return m.pingErr
 }
 
 func (m *mockTelemetryStore) IngestPosition(ctx context.Context, pos *telemetry.Position) error {
@@ -64,9 +71,16 @@ func (m *mockTelemetryStore) ListPositions(ctx context.Context, filter telemetry
 }
 
 func setupTestMux(mock *mockTelemetryStore) *http.ServeMux {
+	var isReady atomic.Bool
+	isReady.Store(true)
+	return setupTestMuxWithReady(mock, &isReady)
+}
+
+func setupTestMuxWithReady(mock *mockTelemetryStore, isReady *atomic.Bool) *http.ServeMux {
 	svc := telemetry.NewService(mock)
 	handlers := &Handlers{
 		telemetry: svc,
+		isReady:   isReady,
 	}
 	mux := http.NewServeMux()
 	handlers.registerRoutes(mux)
@@ -346,5 +360,66 @@ func TestPanicRecovery(t *testing.T) {
 	}
 	if res.Error != "Internal server error. Please try again later." {
 		t.Fatalf("unexpected error response: %q", res.Error)
+	}
+}
+
+func TestHealthLive(t *testing.T) {
+	mux := setupTestMux(&mockTelemetryStore{})
+	req := httptest.NewRequest(http.MethodGet, "/health/live", nil)
+	rec := httptest.NewRecorder()
+
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	if rec.Body.String() != "OK" {
+		t.Fatalf("expected 'OK', got %q", rec.Body.String())
+	}
+}
+
+func TestHealthReady_Success(t *testing.T) {
+	mux := setupTestMux(&mockTelemetryStore{})
+	req := httptest.NewRequest(http.MethodGet, "/health/ready", nil)
+	rec := httptest.NewRecorder()
+
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	if rec.Body.String() != "OK" {
+		t.Fatalf("expected 'OK', got %q", rec.Body.String())
+	}
+}
+
+func TestHealthReady_ShuttingDown(t *testing.T) {
+	var isReady atomic.Bool
+	isReady.Store(false)
+	mux := setupTestMuxWithReady(&mockTelemetryStore{}, &isReady)
+
+	req := httptest.NewRequest(http.MethodGet, "/health/ready", nil)
+	rec := httptest.NewRecorder()
+
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503, got %d", rec.Code)
+	}
+}
+
+func TestHealthReady_DatabaseError(t *testing.T) {
+	mock := &mockTelemetryStore{
+		pingErr: errors.New("connection refused"),
+	}
+	mux := setupTestMux(mock)
+
+	req := httptest.NewRequest(http.MethodGet, "/health/ready", nil)
+	rec := httptest.NewRecorder()
+
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503, got %d", rec.Code)
 	}
 }

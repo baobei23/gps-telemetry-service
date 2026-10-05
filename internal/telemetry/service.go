@@ -36,3 +36,8 @@ func (s *Service) GetLatestPosition(ctx context.Context, deviceID string) (*Posi
 func (s *Service) ListPositions(ctx context.Context, filter PositionsFilter) (*PaginatedPositions, error) {
 	return s.store.ListPositions(ctx, filter)
 }
+
+// Ping checks whether the underlying telemetry store is healthy.
+func (s *Service) Ping(ctx context.Context) error {
+	return s.store.Ping(ctx)
+}

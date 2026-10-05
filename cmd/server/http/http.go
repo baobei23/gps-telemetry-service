@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"gps-telemetry-service/internal/telemetry"
@@ -37,9 +38,10 @@ func (h *HTTP) Shutdown(ctx context.Context) error {
 }
 
 // NewService returns an instance of HTTP with all its dependencies set
-func NewService(cfg *Config, telemetrySvc *telemetry.Service) (*HTTP, error) {
+func NewService(cfg *Config, telemetrySvc *telemetry.Service, isReady *atomic.Bool) (*HTTP, error) {
 	handlers := &Handlers{
 		telemetry: telemetrySvc,
+		isReady:   isReady,
 	}
 
 	mux := http.NewServeMux()

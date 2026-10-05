@@ -230,3 +230,8 @@ func (s *PostgresStore) ListPositions(ctx context.Context, filter PositionsFilte
 		NextCursor: nextCursor,
 	}, nil
 }
+
+// Ping verifies the database connection pool is healthy.
+func (s *PostgresStore) Ping(ctx context.Context) error {
+	return s.pool.Ping(ctx)
+}

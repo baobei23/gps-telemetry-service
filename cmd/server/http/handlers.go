@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"sync/atomic"
 
 	"gps-telemetry-service/internal/telemetry"
 )
@@ -9,6 +10,7 @@ import (
 // Handlers struct has all the dependencies required for HTTP handlers
 type Handlers struct {
 	telemetry *telemetry.Service
+	isReady   *atomic.Bool
 }
 
 func (h *Handlers) registerRoutes(mux *http.ServeMux) {
@@ -19,4 +21,8 @@ func (h *Handlers) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/devices", h.ListDevices)
 	mux.HandleFunc("GET /api/devices/{id}/latest", h.GetLatestPosition)
 	mux.HandleFunc("GET /api/devices/{id}/positions", h.ListPositions)
+
+	// Health checks
+	mux.HandleFunc("GET /health/live", h.Live)
+	mux.HandleFunc("GET /health/ready", h.Ready)
 }

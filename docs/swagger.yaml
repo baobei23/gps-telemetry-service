@@ -266,4 +266,35 @@ paths:
       summary: List position history
       tags:
       - Devices
+  /health/live:
+    get:
+      description: Returns 200 OK if the service process is alive.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Liveness probe
+      tags:
+      - Health
+  /health/ready:
+    get:
+      description: Returns 200 OK if the service is ready to accept traffic and dependent
+        database is reachable. Returns 503 during shutdown or DB outage.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            type: string
+      summary: Readiness probe
+      tags:
+      - Health
 swagger: "2.0"

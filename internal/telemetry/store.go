@@ -17,4 +17,5 @@ type Store interface {
 	ListDevices(ctx context.Context, activeThreshold time.Duration) ([]DeviceSummary, error)
 	GetLatestPosition(ctx context.Context, deviceID string) (*Position, error)
 	ListPositions(ctx context.Context, filter PositionsFilter) (*PaginatedPositions, error)
+	Ping(ctx context.Context) error
 }

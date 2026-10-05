@@ -27,7 +27,7 @@ import (
 //	@Success		200			"Position persisted or duplicate ignored; empty response body"
 //	@Failure		400			{object}	ErrorResponse	"Invalid or missing query parameter"
 //	@Failure		500			{object}	ErrorResponse	"Unexpected persistence error"
-//	@Router			/																																																											[get]
+//	@Router			/																																																																		[get]
 func (h *Handlers) IngestPosition(w http.ResponseWriter, r *http.Request) {
 	serverTime := time.Now()
 
