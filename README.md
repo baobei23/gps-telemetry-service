@@ -1,6 +1,6 @@
 # Real-Time GPS Telemetry Ingestion Service
 
-Production-ready backend service built with Go and PostgreSQL designed to ingest, validate, persist, and expose real-time GPS telemetry from tracking devices communicating via Traccar's OsmAnd protocol.
+A Go backend service for ingesting, validating, and querying real-time GPS telemetry using Traccar's OsmAnd protocol, backed by PostgreSQL.
 
 ---
 
@@ -46,32 +46,32 @@ flowchart TD
     Database -.-> POS_TBL
 ```
 
-### Key Architectural Characteristics
-- **Transport & Domain Separation**: Clean architecture ensures HTTP query parameter parsing and transport concerns remain strictly decoupled from the core domain logic (`internal/telemetry`).
-- **Atomic Single-Roundtrip CTE**: Ingestion persists position data and updates device `first_seen_at` and `last_seen_at` in a single SQL CTE statement with `ON CONFLICT DO NOTHING` for idempotency and `GREATEST`/`LEAST` for out-of-order timestamps.
-- **Keyset Cursor Pagination**: History traversal queries use an opaque base64 cursor based on `device_time DESC` over an exact B-tree unique index scan, achieving sub-millisecond query execution (`0.1 ms`) with zero data drift or missing records.
-- **Structured Logging**: Comprehensive JSON structured logging includes `deviceId`, `requestId`, `status`, and `duration` (latency) across all requests.
+### Highlights
+- **Layered Structure**: HTTP handlers parse and validate request parameters before delegating to the `telemetry` domain package.
+- **Atomic Ingestion**: Device timestamps and positions are written in a single CTE query, guaranteeing idempotency and out-of-order protection (`GREATEST`/`LEAST`).
+- **Keyset Cursor Pagination**: History queries use an opaque `device_time` cursor over an existing unique index, providing constant-time reads ($O(1)$) without page drift.
+- **Structured Logs**: Requests are logged in JSON format with `deviceId`, `requestId`, `status`, and `duration`.
 
 ---
 
-## Quickstart (Happy Path in 5 Commands)
+## Quickstart
 
-Clone the repository and run the following shell commands:
+To run the full stack locally using Docker Compose:
 
 ```bash
-# 1. Copy sample environment configuration
+# Copy sample environment configuration
 cp .env.example .env
 
-# 2. Build and start the entire stack (PostgreSQL, Migrations, Backend Service)
+# Build and start the entire stack (PostgreSQL, Migrations, Backend Service)
 docker compose -f docker/docker-compose.yaml --env-file .env up -d --build
 
-# 3. Verify service health and database readiness (Port 5055)
+# Verify service health and database readiness (Port 5055)
 curl -s http://localhost:5055/health/ready
 
-# 4. Run the interactive GPS simulator (press [4] in TUI to start transmitting)
+# Run the interactive GPS simulator (press [4] in TUI to start transmitting)
 docker compose -f docker/docker-compose.yaml run --rm simulator
 
-# 5. Query active devices and position history
+# Query active devices and position history
 curl -s http://localhost:5055/api/devices
 ```
 
@@ -190,7 +190,7 @@ go test -v -run TestIntegration ./internal/telemetry
 ## Performance Note
 
 ### 1. Ingestion Path and Main Bottlenecks
-- **Network I/O & Connection Pool**: Each HTTP GET request is parsed in under `2 microseconds` in memory. The primary boundary is the database connection pool (`pgxpool`, size 24).
+- **Network I/O & Connection Pool**: Each HTTP GET request is parsed in under `2 microseconds` in memory. The primary capacity boundary is the database connection pool (`pgxpool`, configured to 64 connections).
 - **Disk I/O Write Locks**: B-tree index updates on `uq_positions_device_time` under concurrent inserts. By executing writes in an atomic single CTE, roundtrips are minimized to 1 per report.
 
 ### 2. Test Method and Observed Results on Local Hardware
@@ -235,9 +235,9 @@ To evolve the design from 100 devices to 10,000 active devices reporting every s
 
 ## Assumptions & Trade-offs
 
-1. **Protocol Adherence**: Implements the OsmAnd GPS protocol as requested. Coordinates are formatted in WGS84 decimal degrees, speed in knots, and timestamps in UTC Unix epoch seconds.
-2. **YAGNI Architecture**: Kept the architecture lean using Go stdlib HTTP routing and native PostgreSQL features. External queuing infrastructure was deliberately avoided for the 100 req/s baseline, preserving simplicity, maintainability, and rapid setup.
-3. **Opaque Keyset Cursors**: Chose keyset pagination over page-number offsets. This trades the ability to jump to arbitrary page numbers for constant $O(1)$ query speed and drift-free real-time pagination.
+- **Protocol Format**: Incoming telemetry adheres to Traccar's OsmAnd HTTP GET format with WGS84 coordinates, knots for speed, and UTC Unix epoch seconds.
+- **Synchronous Ingestion**: Direct database persistence was chosen over message queues to minimize operational complexity for the target 100 req/s workload while guaranteeing durability and immediate read-after-write consistency.
+- **Keyset vs Offset Pagination**: Keyset cursor pagination trades random page jumps for constant $O(1)$ query speed and drift-free real-time traversal.
 
 ---
 
