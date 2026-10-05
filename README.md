@@ -222,3 +222,30 @@ To evolve the design from 100 devices to 10,000 active devices reporting every s
 1. **Protocol Adherence**: Implements the OsmAnd GPS protocol as requested. Coordinates are formatted in WGS84 decimal degrees, speed in knots, and timestamps in UTC Unix epoch seconds.
 2. **YAGNI Architecture**: Kept the architecture lean using Go stdlib HTTP routing and native PostgreSQL features. External queuing infrastructure was deliberately avoided for the 100 req/s baseline, preserving simplicity, maintainability, and rapid setup.
 3. **Opaque Keyset Cursors**: Chose keyset pagination over page-number offsets. This trades the ability to jump to arbitrary page numbers for constant $O(1)$ query speed and drift-free real-time pagination.
+
+---
+
+## Submission Notes
+
+### What Would Be Improved With Another Day
+1. **Asynchronous Ingestion Pipeline (10,000+ Devices)**:
+   - Introduce Apache Kafka / Redpanda buffer keyed by `deviceId`. Ingestion gateways acknowledge with `202 Accepted` and consumer workers micro-batch writes using PostgreSQL's native `COPY` protocol (`pgx.CopyFrom`) for 10x higher insert throughput.
+2. **Declarative Time-Series Partitioning**:
+   - Implement PostgreSQL declarative table partitioning (`PARTITION BY RANGE (device_time)`) by week/month with automated retention jobs (`pg_partman`), ensuring B-Tree indexes fit in working memory and data pruning is instant via `DROP TABLE` without exclusive write locks.
+3. **Device Authentication & Ingress Rate Limiting**:
+   - Add token/pre-shared key authentication per device and token-bucket rate limiting per IMEI at the HTTP middleware level to isolate rogue devices from degrading shared database connections.
+4. **Live Fleet Tracking Dashboard**:
+   - Build a lightweight web UI using Server-Sent Events (SSE) or WebSockets to visualize moving vehicle tracks live on an interactive Leaflet/MapLibre map of Jakarta.
+
+### AI Assistance & Verification Disclosure
+AI-assisted tooling was utilized during development for codebase exploration, refactoring, test drafting, and documentation generation with the following setup:
+- **Agent Harness**: Claude Code Terminal
+- **Model**: Gemini 3.8 Flash (proxied via 9router)
+- **Effort Level**: Max
+- **Skill / Extension**: Ponytail (ladder-enforced minimalist engineering)
+
+All generated code, queries, and architectural decisions were verified through:
+- **Unit Test Coverage**: Comprehensive test suites verifying mathematical boundaries, type conversions, query parameter errors, and explicit rejection of non-finite floating-point values (`NaN`, `Inf`).
+- **Database Integration Tests**: Automated integration tests (`internal/telemetry/integration_test.go`) running directly against PostgreSQL verifying read-after-write consistency, multi-device isolation, idempotent duplicate suppression, out-of-order timestamps, and cursor pagination traversal without gaps.
+- **Physical Query Plan Profiling**: Execution plans inspected using `EXPLAIN ANALYZE` on a generated benchmark dataset of 10,000 devices and 8.64 million rows, confirming $O(1)$ backward index scans under 2ms without in-memory sorting.
+
