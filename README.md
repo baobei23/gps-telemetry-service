@@ -195,11 +195,27 @@ go test -v -run TestIntegration ./internal/telemetry
 
 ### 2. Test Method and Observed Results on Local Hardware
 - **Hardware**: Apple Silicon (M-series / ARM64), Docker Desktop 17 with 4 CPU cores, 4GB RAM allocated.
-- **Dataset Scaled**: Benchmark executed against **10,000 devices** and **8,640,000 persisted telemetry rows** (~1.97 GB table + index footprint):
-  - `GET /api/devices` (10,000 devices): **`2.1 ms`** execution time via `idx_devices_last_seen`.
+- **Reproducible Load Test (k6)**:
+  Run the automated 100-device concurrent ingestion benchmark with 1 command:
+  ```bash
+  docker compose -f docker/docker-compose.yaml --env-file .env --profile k6 run --rm k6
+  ```
+- **Observed 100-Device Ingestion Benchmark**:
+  - **Simulated Devices**: 100 concurrent Virtual Users (VUs), each transmitting 1 report/second with unique 15-digit IMEIs.
+  - **Test Duration**: 30 seconds (3,000 total telemetry requests).
+  - **HTTP Success Rate**: **100.00%** (0 errors out of 3,000 requests).
+  - **Throughput**: **97.6 req/s** sustained (target ~100 req/s).
+  - **Latency Distribution**:
+    - Average: `16.45ms`
+    - Median (p50): `12.63ms`
+    - p90: `26.32ms`
+    - p95: `50.15ms`
+    - p99: `68.76ms`
+    - Max: `72.34ms`
+- **Read Latencies on Scaled Dataset** (10,000 devices, 8.64 million rows, ~1.97 GB table + index):
+  - `GET /api/devices`: **`2.1 ms`** execution time via `idx_devices_last_seen`.
   - `GET /api/devices/{id}/latest`: **`1.6 ms`** execution time via backward B-Tree scan on unique constraint.
   - `GET /api/devices/{id}/positions` (Keyset pagination): **`0.106 ms`** execution time with zero disk/memory sorting overhead.
-  - **Sustained Throughput**: Handles over **1,200 req/s** sustained local HTTP ingestion with p99 latency `< 12 ms`.
 
 ### 3. Scaling Path: Evolution to 10,000 Active Devices (~10,000 req/s)
 To evolve the design from 100 devices to 10,000 active devices reporting every second:
@@ -248,4 +264,3 @@ All generated code, queries, and architectural decisions were verified through:
 - **Unit Test Coverage**: Comprehensive test suites verifying mathematical boundaries, type conversions, query parameter errors, and explicit rejection of non-finite floating-point values (`NaN`, `Inf`).
 - **Database Integration Tests**: Automated integration tests (`internal/telemetry/integration_test.go`) running directly against PostgreSQL verifying read-after-write consistency, multi-device isolation, idempotent duplicate suppression, out-of-order timestamps, and cursor pagination traversal without gaps.
 - **Physical Query Plan Profiling**: Execution plans inspected using `EXPLAIN ANALYZE` on a generated benchmark dataset of 10,000 devices and 8.64 million rows, confirming $O(1)$ backward index scans under 2ms without in-memory sorting.
-

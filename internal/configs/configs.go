@@ -53,7 +53,7 @@ func (cfg *Configs) Postgres() *postgres.Config {
 		Username:  os.Getenv("POSTGRES_USERNAME"),
 		Password:  os.Getenv("POSTGRES_PASSWORD"),
 
-		ConnPoolSize:  24,
+		ConnPoolSize:  64,
 		IdleTimeout:   time.Minute,
 		DialTimeout:   time.Second * 3,
 		EnableTracing: cfg.EnableTracing,

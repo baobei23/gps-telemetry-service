@@ -72,6 +72,23 @@ services:
     profiles:
       - simulator
 
+  k6:
+    image: grafana/k6:latest
+    volumes:
+      - ../scripts/loadtest:/scripts
+    environment:
+      TARGET_URL: http://goapp:5055
+    entrypoint:
+      - k6
+      - run
+      - /scripts/ingestion.js
+    depends_on:
+      - goapp
+    networks:
+      - goapp_network
+    profiles:
+      - k6
+
 networks:
   goapp_network:
 
