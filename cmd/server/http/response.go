@@ -73,10 +73,3 @@ func writeError(w http.ResponseWriter, r *http.Request, status int, err error) {
 		Error: clientMsg,
 	})
 }
-
-// decodeJSON decodes the request body with a size ceiling
-func decodeJSON(w http.ResponseWriter, r *http.Request, dst any) error {
-	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
-
-	return json.NewDecoder(r.Body).Decode(dst)
-}

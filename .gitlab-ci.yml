@@ -1,0 +1,53 @@
+stages:
+  - audit
+  - security
+
+variables:
+  GOPATH: $CI_PROJECT_DIR/.go
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .go/pkg/mod/
+
+# ============================================================================
+# STAGE 1: CODE QUALITY, LINT & TESTS
+# ============================================================================
+audit:quality:
+  stage: audit
+  image: golang:1.27.1-alpine
+  before_script:
+    - apk add --no-cache git gcc musl-dev
+  script:
+    - go mod verify
+    - go vet ./...
+    - go install honnef.co/go/tools/cmd/staticcheck@latest
+    - $(go env GOPATH)/bin/staticcheck ./...
+    - go test -v -race ./...
+    - go build -v ./...
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+# ============================================================================
+# STAGE 2: SECURITY VULNERABILITY SCANS
+# ============================================================================
+security:trivy:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy fs --exit-code 0 --severity CRITICAL,HIGH --ignore-unfixed .
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+security:govulncheck:
+  stage: security
+  image: golang:1.27.1-alpine
+  before_script:
+    - apk add --no-cache git
+  script:
+    - go install golang.org/x/vuln/cmd/govulncheck@latest
+    - $(go env GOPATH)/bin/govulncheck ./...
+  rules:
+    - if: $CI_COMMIT_BRANCH
