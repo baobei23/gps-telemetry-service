@@ -64,9 +64,9 @@ func setupTelemetry(cfgs *configs.Configs) *sdktrace.TracerProvider {
 	return tp
 }
 
-func startServers(telemetrySvc *telemetry.Service, cfgs *configs.Configs, fatalErr chan<- error) (*xhttp.HTTP, *grpc.GRPC) {
+func startServers(telemetrySvc *telemetry.Service, isReady *atomic.Bool, cfgs *configs.Configs, fatalErr chan<- error) (*xhttp.HTTP, *grpc.GRPC) {
 	hcfg, _ := cfgs.HTTP()
-	hserver, err := xhttp.NewService(hcfg, telemetrySvc)
+	hserver, err := xhttp.NewService(hcfg, telemetrySvc, isReady)
 	if err != nil {
 		fatalErr <- fmt.Errorf("failed to initialize HTTP server: %w", err)
 	}
@@ -132,6 +132,6 @@ func start(
 	telemetryStore := telemetry.NewPostgresStore(pqdriver)
 	telemetrySvc := telemetry.NewService(telemetryStore)
 
-	hserver, gserver = startServers(telemetrySvc, cfgs, fatalErr)
+	hserver, gserver = startServers(telemetrySvc, isReady, cfgs, fatalErr)
 	return
 }
