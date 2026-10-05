@@ -14,13 +14,7 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-const (
-	minConn           = 2
-	maxConnLifetime   = time.Minute * 5
-	healthCheckPeriod = time.Second * 30
-)
-
-// Config struct holds all the configurations required the datastore package
+// Config struct holds all the configurations required for the postgres datastore
 type Config struct {
 	Host   string `json:"host,omitempty"`
 	Port   string `json:"port,omitempty"`
@@ -32,9 +26,12 @@ type Config struct {
 
 	SSLMode string `json:"sslMode,omitempty"`
 
-	ConnPoolSize uint          `json:"connPoolSize,omitempty"`
-	IdleTimeout  time.Duration `json:"idleTimeout,omitempty"`
-	DialTimeout  time.Duration `json:"dialTimeout,omitempty"`
+	MinConns          int32         `json:"minConns,omitempty"`
+	MaxConns          int32         `json:"maxConns,omitempty"`
+	IdleTimeout       time.Duration `json:"idleTimeout,omitempty"`
+	MaxConnLifetime   time.Duration `json:"maxConnLifetime,omitempty"`
+	HealthCheckPeriod time.Duration `json:"healthCheckPeriod,omitempty"`
+	DialTimeout       time.Duration `json:"dialTimeout,omitempty"`
 
 	EnableTracing bool
 }
@@ -85,17 +82,18 @@ func pgxPoolConfig(cfg *Config) (*pgxpool.Config, error) {
 	// poolconfig.BeforeClose func(*pgx.Conn)
 
 	// MaxConnLifetime is the duration since creation after which a connection will be automatically closed.
-	poolconfig.MaxConnLifetime = maxConnLifetime
+	poolconfig.MaxConnLifetime = cfg.MaxConnLifetime
 	// MaxConnLifetimeJitter is the duration after MaxConnLifetime to randomly decide to close a connection.
 	// This helps prevent all connections from being closed at the exact same time, starving the pool.
-	poolconfig.MaxConnLifetimeJitter = time.Hour
+	poolconfig.MaxConnLifetimeJitter = time.Minute
 	// MaxConnIdleTime is the duration after which an idle connection will be automatically closed by the health check.
-	poolconfig.MaxConnIdleTime = time.Microsecond
-	// MaxConns is the maximum size of the pool. The default is the greater of 4 or runtime.NumCPU().
-	// MaxConns:
-	poolconfig.MinConns = minConn
+	poolconfig.MaxConnIdleTime = cfg.IdleTimeout
+	// MaxConns is the maximum size of the pool.
+	poolconfig.MaxConns = cfg.MaxConns
+	// MinConns is the minimum number of connections to keep open in the pool.
+	poolconfig.MinConns = cfg.MinConns
 	// HealthCheckPeriod is the duration between checks of the health of idle connections.
-	poolconfig.HealthCheckPeriod = healthCheckPeriod
+	poolconfig.HealthCheckPeriod = cfg.HealthCheckPeriod
 	return poolconfig, nil
 }
 
@@ -105,9 +103,6 @@ func NewPool(cfg *Config) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	poolcfg.MaxConnLifetime = cfg.IdleTimeout
-	poolcfg.MaxConns = int32(cfg.ConnPoolSize)
 
 	dialer := &net.Dialer{KeepAlive: cfg.DialTimeout}
 	dialer.Timeout = cfg.DialTimeout

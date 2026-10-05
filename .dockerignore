@@ -1,0 +1,21 @@
+.git
+.github
+.gitlab-ci.yml
+.DS_Store
+.air.toml
+.env
+.envrc
+.history
+.idea
+.vscode
+
+# Documentation and project notes
+*.md
+docs/
+
+# Testing and scripts
+scripts/
+simulator/
+tmp/
+*.test
+*.out

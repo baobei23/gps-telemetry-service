@@ -17,21 +17,18 @@ migrate-up:
 migrate-down:
 	@migrate -path=$(MIGRATIONS_PATH) -database=$(DB_ADDR) down $(filter-out $@,$(MAKECMDGOALS))
 
-.PHONY: seed-users
-seed-users:
-	@go run db/seed/users/main.go
-
-.PHONY: seed-products
-seed-products:
-	@go run db/seed/products/main.go
-
-.PHONY: seed
-seed: seed-users seed-products
+.PHONY: test-race
+test-race:
+	@go test -v -race ./...
 
 .PHONY: gen-docs
 gen-docs:
 	@swag init -g ./main.go -d . --outputTypes json,yaml && swag fmt
 
-.PHONY: e2e
-e2e:
-	@./scripts/e2e.sh
+.PHONY: loadtest-ingest
+loadtest-ingest:
+	@k6 run scripts/loadtest/ingestion.js
+
+.PHONY: loadtest-read
+loadtest-read:
+	@k6 run scripts/loadtest/read_api.js
