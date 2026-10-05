@@ -341,6 +341,55 @@ func TestLoggingMiddleware(t *testing.T) {
 	}
 }
 
+func TestRequestIDMiddleware_Generated(t *testing.T) {
+	var capturedID string
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedID = GetRequestID(r.Context())
+		w.WriteHeader(http.StatusOK)
+	})
+
+	handler := requestIDMiddleware(inner)
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	respID := rec.Header().Get("X-Request-ID")
+	if respID == "" {
+		t.Fatal("expected non-empty X-Request-ID response header")
+	}
+	if capturedID != respID {
+		t.Fatalf("expected context request ID %q to match response header %q", capturedID, respID)
+	}
+}
+
+func TestRequestIDMiddleware_Preserved(t *testing.T) {
+	const customID = "custom-uuid-12345"
+	var capturedID string
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedID = GetRequestID(r.Context())
+		w.WriteHeader(http.StatusOK)
+	})
+
+	handler := requestIDMiddleware(inner)
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("X-Request-ID", customID)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	respID := rec.Header().Get("X-Request-ID")
+	if respID != customID {
+		t.Fatalf("expected preserved X-Request-ID %q, got %q", customID, respID)
+	}
+	if capturedID != customID {
+		t.Fatalf("expected context request ID %q, got %q", customID, capturedID)
+	}
+}
+
 func TestPanicRecovery(t *testing.T) {
 	panickingHandler := recoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("unexpected boom")

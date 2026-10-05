@@ -51,11 +51,15 @@ func writeError(w http.ResponseWriter, r *http.Request, status int, err error) {
 	var clientMsg string
 
 	if status >= http.StatusInternalServerError {
-		slog.ErrorContext(r.Context(), "internal server error",
+		attrs := []any{
 			"method", r.Method,
 			"path", r.URL.Path,
 			"error", err,
-		)
+		}
+		if reqID := GetRequestID(r.Context()); reqID != "" {
+			attrs = append(attrs, "requestId", reqID)
+		}
+		slog.ErrorContext(r.Context(), "internal server error", attrs...)
 		clientMsg = "Internal server error. Please try again later."
 	} else if err != nil {
 		clientMsg = err.Error()

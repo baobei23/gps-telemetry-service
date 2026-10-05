@@ -53,11 +53,13 @@ func NewService(cfg *Config, telemetrySvc *telemetry.Service, isReady *atomic.Bo
 		handler = otelhttp.NewHandler(handler, "goapp")
 	}
 
+	handler = recoveryMiddleware(handler)
+
 	if cfg.EnableAccessLog {
 		handler = loggingMiddleware(handler)
 	}
 
-	handler = recoveryMiddleware(handler)
+	handler = requestIDMiddleware(handler)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
