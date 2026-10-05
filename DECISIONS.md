@@ -93,4 +93,10 @@ Adopt **Direct Synchronous Persistence** as the durability boundary:
   - Immediate Read-After-Write Consistency: Newly ingested coordinates appear instantly in `/api/devices/{id}/latest`.
   - Minimal operational footprint: Only requires Go runtime and PostgreSQL (no Kafka, ZooKeeper, or Redis overhead).
 - **Negative**:
-  - Ingestion throughput is bounded by PostgreSQL write latency and connection pool size (~24 connections). If scale increases to 10,000+ devices (10,000 req/s), an asynchronous streaming tier (Kafka + TimescaleDB hypertable bulk copy) will be required.
+  - Ingestion throughput is bounded by PostgreSQL write latency and connection pool size (configured to 64 connections). If scale increases to 10,000+ devices (10,000 req/s), an asynchronous streaming tier (Kafka + TimescaleDB hypertable bulk copy) will be required.
+
+### Dead-Letter Handling Considerations
+- **Why full pubsub DLQ is omitted**:
+  In a synchronous ingestion design, validation failures are immediately rejected with descriptive `400 Bad Request` responses, providing direct feedback to the sender. During database outages, returning `503 Service Unavailable` signals tracking devices to leverage their built-in local flash storage and network retry logic. Introducing an external pubsub broker (e.g., Kafka / RabbitMQ DLQ) solely for dead-letter queuing adds unwarranted operational complexity and failure points for a 100 req/s baseline.
+- **Pragmatic evolutionary path**:
+  If offline persistence during prolonged database downtime is desired, an **append-only disk spillover log (`deadletter.log`)** is preferred over distributed pubsub. A local sequential file write requires zero network dependencies, survives service restarts, and can be replayed cleanly via a lightweight background worker once PostgreSQL connectivity is restored.
