@@ -212,10 +212,12 @@ go test -v -run TestIntegration ./internal/telemetry
     - p95: `50.15ms`
     - p99: `68.76ms`
     - Max: `72.34ms`
-- **Read Latencies on Scaled Dataset** (10,000 devices, 8.64 million rows, ~1.97 GB table + index):
-  - `GET /api/devices`: **`2.1 ms`** execution time via `idx_devices_last_seen`.
-  - `GET /api/devices/{id}/latest`: **`1.6 ms`** execution time via backward B-Tree scan on unique constraint.
-  - `GET /api/devices/{id}/positions` (Keyset pagination): **`0.106 ms`** execution time with zero disk/memory sorting overhead.
+- **Read Latencies on Scaled Dataset** (10,000 devices, 8.64 million rows, ~2.7 GB table + indexes, tested under 50 concurrent VUs, 2,139 req/s throughput via `scripts/loadtest/read_api.js`):
+  - `GET /api/devices/{id}/latest`: median **`2.68 ms`**, p95 **`12.0 ms`**, avg **`4.28 ms`**.
+  - `GET /api/devices/{id}/positions` (Page 1): median **`4.00 ms`**, p95 **`15.0 ms`**, avg **`5.53 ms`**.
+  - `GET /api/devices/{id}/positions` (Page 2 Keyset Cursor): median **`3.91 ms`**, p95 **`14.6 ms`**, avg **`5.44 ms`**.
+  - `GET /api/devices` (returning all 10,100 devices array): median **`27.77 ms`**, p95 **`60.3 ms`**, avg **`31.39 ms`**.
+  - **Overall Read Error Rate**: **`0.00%`** (0 errors out of 64,390 requests).
 
 ### 3. Scaling Path: Evolution to 10,000 Active Devices (~10,000 req/s)
 To evolve the design from 100 devices to 10,000 active devices reporting every second:
