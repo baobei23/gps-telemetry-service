@@ -14,4 +14,9 @@ type Handlers struct {
 func (h *Handlers) registerRoutes(mux *http.ServeMux) {
 	// OsmAnd telemetry ingestion
 	mux.HandleFunc("GET /{$}", h.IngestPosition)
+
+	// Read API
+	mux.HandleFunc("GET /api/devices", h.ListDevices)
+	mux.HandleFunc("GET /api/devices/{id}/latest", h.GetLatestPosition)
+	mux.HandleFunc("GET /api/devices/{id}/positions", h.ListPositions)
 }

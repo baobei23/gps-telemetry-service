@@ -1,10 +1,70 @@
 basePath: /
 definitions:
+  http.BaseResponse:
+    properties:
+      data: {}
+    type: object
   http.ErrorResponse:
     properties:
       error:
         example: Something went wrong
         type: string
+    type: object
+  http.PaginatedResponse:
+    properties:
+      data: {}
+      pagination:
+        $ref: '#/definitions/http.PaginationMeta'
+    type: object
+  http.PaginationMeta:
+    properties:
+      limit:
+        type: integer
+      nextCursor:
+        type: string
+    type: object
+  telemetry.DeviceSummary:
+    properties:
+      firstSeenAt:
+        type: string
+      id:
+        type: string
+      lastSeenAt:
+        type: string
+      status:
+        description: '"active" or "inactive"'
+        type: string
+    type: object
+  telemetry.Position:
+    properties:
+      accuracy:
+        type: number
+      altitude:
+        type: number
+      batt:
+        type: number
+      bearing:
+        type: number
+      charge:
+        type: boolean
+      deviceId:
+        type: string
+      deviceTime:
+        type: string
+      hdop:
+        type: number
+      id:
+        type: integer
+      lat:
+        type: number
+      lon:
+        type: number
+      serverTime:
+        type: string
+      speed:
+        type: number
+      valid:
+        type: integer
     type: object
 info:
   contact:
@@ -89,4 +149,121 @@ paths:
       summary: Ingest a GPS position
       tags:
       - Telemetry
+  /api/devices:
+    get:
+      description: Retrieves all tracked GPS devices with first/last seen timestamps
+        and activity status.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/telemetry.DeviceSummary'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: List tracked devices
+      tags:
+      - Devices
+  /api/devices/{id}/latest:
+    get:
+      description: Retrieves the most recent GPS fix reported by the specified device
+        ID.
+      parameters:
+      - description: Device identifier
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/telemetry.Position'
+              type: object
+        "400":
+          description: Device ID is required
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get latest device position
+      tags:
+      - Devices
+  /api/devices/{id}/positions:
+    get:
+      description: Retrieves paginated GPS position history for a device within an
+        optional time range using keyset cursor pagination.
+      parameters:
+      - description: Device identifier
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Start timestamp in RFC3339 format
+        in: query
+        name: from
+        type: string
+      - description: End timestamp in RFC3339 format
+        in: query
+        name: to
+        type: string
+      - description: Page size limit (1-100, default 50)
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque cursor token for next page
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/telemetry.Position'
+                  type: array
+              type: object
+        "400":
+          description: Invalid query parameter format or range
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Device not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: List position history
+      tags:
+      - Devices
 swagger: "2.0"

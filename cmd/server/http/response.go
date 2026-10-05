@@ -10,6 +10,16 @@ type BaseResponse struct {
 	Data any `json:"data,omitempty"`
 }
 
+type PaginatedResponse struct {
+	Data       any            `json:"data"`
+	Pagination PaginationMeta `json:"pagination"`
+}
+
+type PaginationMeta struct {
+	Limit      int     `json:"limit"`
+	NextCursor *string `json:"nextCursor"`
+}
+
 type ErrorResponse struct {
 	Error string `json:"error" example:"Something went wrong"`
 }
@@ -20,6 +30,19 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(BaseResponse{
 		Data: data,
+	})
+}
+
+// writePaginatedJSON sends a JSON response with items and pagination metadata
+func writePaginatedJSON(w http.ResponseWriter, status int, data any, limit int, nextCursor *string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(PaginatedResponse{
+		Data: data,
+		Pagination: PaginationMeta{
+			Limit:      limit,
+			NextCursor: nextCursor,
+		},
 	})
 }
 
