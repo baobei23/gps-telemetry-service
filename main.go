@@ -85,7 +85,11 @@ func main() {
 	// This needs to remain after log initialisation and before server initialisation.
 	tp := setupTelemetry(cfgs)
 	if tp != nil {
-		defer tp.Shutdown(ctx)
+		defer func() {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = tp.Shutdown(shutdownCtx)
+		}()
 	}
 
 	hserver, gserver, healthServer, db := start(ctx, &isReady, cfgs, fatalErr)

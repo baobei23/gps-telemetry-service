@@ -187,6 +187,19 @@ go test -v -run TestIntegration ./internal/telemetry
 
 ---
 
+## Observability
+
+- **Structured Access Logs**: Streamed in JSON with `deviceId`, `requestId`, `status`, and `duration`.
+- **Prometheus Metrics**: Scraped at `:9090/metrics` or `:9090/-/metrics` (includes `gps_http_requests_total` and latency histogram `gps_http_request_duration_seconds`).
+- **Distributed Tracing (Jaeger)**:
+  Run the stack with the `tracing` profile:
+  ```bash
+  docker compose -f docker/docker-compose.yaml --env-file .env --profile tracing up -d
+  ```
+  Open **`http://localhost:16686`** in browser to visualize end-to-end spans across incoming HTTP requests and PostgreSQL CTE queries.
+
+---
+
 ## Performance Note
 
 ### 1. Ingestion Path and Main Bottlenecks

@@ -52,7 +52,7 @@ func setupTelemetry(cfgs *configs.Configs) *sdktrace.TracerProvider {
 			),
 		)
 
-		exporter, _ := otlptracegrpc.New(context.Background())
+		exporter, _ := otlptracegrpc.New(context.Background(), otlptracegrpc.WithInsecure())
 
 		tp = sdktrace.NewTracerProvider(
 			sdktrace.WithSampler(sdktrace.TraceIDRatioBased(0.5)),
@@ -60,6 +60,7 @@ func setupTelemetry(cfgs *configs.Configs) *sdktrace.TracerProvider {
 			sdktrace.WithBatcher(exporter),
 		)
 		otel.SetTracerProvider(tp)
+		slog.Info("[otel/trace] opentelemetry tracing enabled", "exporter", "otlp/grpc", "sampleRatio", 0.5)
 	}
 
 	return tp

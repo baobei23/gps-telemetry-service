@@ -50,7 +50,7 @@ func NewService(cfg *Config, telemetrySvc *telemetry.Service, isReady *atomic.Bo
 	var handler http.Handler = mux
 
 	if cfg.EnableTracing {
-		handler = otelhttp.NewHandler(handler, "goapp")
+		handler = otelhttp.NewHandler(handler, "gps-telemetry-service")
 	}
 
 	handler = recoveryMiddleware(handler)

@@ -48,6 +48,8 @@ services:
       POSTGRES_SSLMODE: ${POSTGRES_SSLMODE}
       ENABLE_METRICS: ${ENABLE_METRICS}
       ENABLE_TRACING: ${ENABLE_TRACING}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-jaeger:4317}
+      OTEL_EXPORTER_OTLP_INSECURE: ${OTEL_EXPORTER_OTLP_INSECURE:-true}
     ports:
       - '5055:5055'
       - '2000:2000'
@@ -88,6 +90,18 @@ services:
       - goapp_network
     profiles:
       - k6
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - '16686:16686'
+      - '4317:4317'
+    networks:
+      - goapp_network
+    profiles:
+      - tracing
 
 networks:
   goapp_network:
