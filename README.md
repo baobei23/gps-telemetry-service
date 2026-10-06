@@ -265,8 +265,8 @@ To evolve the design from 100 devices to 10,000 active devices reporting every s
    - Implement PostgreSQL declarative table partitioning (`PARTITION BY RANGE (device_time)`) by week/month with automated retention jobs (`pg_partman`), ensuring B-Tree indexes fit in working memory and data pruning is instant via `DROP TABLE` without exclusive write locks.
 3. **Device Authentication & Ingress Rate Limiting**:
    - Add token/pre-shared key authentication per device and token-bucket rate limiting per IMEI at the HTTP middleware level to isolate rogue devices from degrading shared database connections.
-4. **Live Fleet Tracking Dashboard**:
-   - Build a lightweight web UI using Server-Sent Events (SSE) or WebSockets to visualize moving vehicle tracks live on an interactive Leaflet/MapLibre map of Jakarta.
+4. **Geospatial Indexing & Geofencing (PostGIS)**:
+   - Integrate the PostgreSQL PostGIS extension with native `GEOMETRY(Point, 4326)` columns and spatial GiST (R-Tree) indexes. Support spatial queries such as vehicle proximity searches (`ST_DWithin`), polygon geofence breach detection, and bounding-box viewport queries.
 
 ### AI Assistance & Verification Disclosure
 AI-assisted tooling was utilized during development for codebase exploration, refactoring, test drafting, and documentation generation with the following setup:
