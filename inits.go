@@ -79,6 +79,7 @@ func startServers(telemetrySvc *telemetry.Service, isReady *atomic.Bool, cfgs *c
 				fatalErr <- fmt.Errorf("%+v", rec)
 			}
 		}()
+		slog.Info("[http] starting telemetry server", "port", hcfg.Port)
 		err = hserver.Start()
 		if err != nil {
 			fatalErr <- fmt.Errorf("failed to start HTTP server: %w", err)
@@ -123,10 +124,17 @@ func start(
 	cfgs *configs.Configs,
 	fatalErr chan<- error,
 ) (hserver *xhttp.HTTP, gserver *grpc.GRPC, healthServer *http.Server, pqdriver *pgxpool.Pool) {
-	pqdriver, err := postgres.NewPool(cfgs.Postgres())
+	pgCfg := cfgs.Postgres()
+	pqdriver, err := postgres.NewPool(pgCfg)
 	if err != nil {
 		panic(fmt.Errorf("failed to connect to postgres: %w", err))
 	}
+	slog.InfoContext(ctx, "postgres pool initialized",
+		"host", pgCfg.Host,
+		"store", pgCfg.StoreName,
+		"minConns", pgCfg.MinConns,
+		"maxConns", pgCfg.MaxConns,
+	)
 
 	healthServer = startHealthServer(ctx, pqdriver, isReady, fatalErr)
 
