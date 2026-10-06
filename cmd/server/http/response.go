@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 )
 
@@ -46,25 +45,17 @@ func writePaginatedJSON(w http.ResponseWriter, status int, data any, limit int, 
 	})
 }
 
-// writeError sends a sanitized error response and logs internal server errors
+// writeError sends a sanitized error response and records server-side errors
 func writeError(w http.ResponseWriter, r *http.Request, status int, err error) {
-	var clientMsg string
+	if status >= http.StatusInternalServerError && err != nil {
+		recordError(r.Context(), err)
+	}
 
+	clientMsg := "Bad request"
 	if status >= http.StatusInternalServerError {
-		attrs := []any{
-			"method", r.Method,
-			"path", r.URL.Path,
-			"error", err,
-		}
-		if reqID := GetRequestID(r.Context()); reqID != "" {
-			attrs = append(attrs, "requestId", reqID)
-		}
-		slog.ErrorContext(r.Context(), "internal server error", attrs...)
 		clientMsg = "Internal server error. Please try again later."
 	} else if err != nil {
 		clientMsg = err.Error()
-	} else {
-		clientMsg = "Bad request"
 	}
 
 	w.Header().Set("Content-Type", "application/json")

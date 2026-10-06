@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -14,6 +14,20 @@ import (
 type contextKey string
 
 const requestIDKey contextKey = "requestID"
+
+type errorCarrier struct {
+	err any
+}
+
+type errorCarrierKey struct{}
+
+func recordError(ctx context.Context, err any) bool {
+	if c, ok := ctx.Value(errorCarrierKey{}).(*errorCarrier); ok && c != nil {
+		c.err = err
+		return true
+	}
+	return false
+}
 
 // GetRequestID extracts the request ID from the request context.
 func GetRequestID(ctx context.Context) string {
@@ -39,8 +53,13 @@ func recoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
-				slog.ErrorContext(r.Context(), "panic recovered", "error", rec)
-				writeError(w, r, http.StatusInternalServerError, errors.New("internal server error"))
+				recordError(r.Context(), rec)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(ErrorResponse{
+					Error: "Internal server error. Please try again later.",
+				})
 			}
 		}()
 		next.ServeHTTP(w, r)
@@ -61,7 +80,10 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		rec := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
-		next.ServeHTTP(rec, r)
+		carrier := &errorCarrier{}
+		ctx := context.WithValue(r.Context(), errorCarrierKey{}, carrier)
+
+		next.ServeHTTP(rec, r.WithContext(ctx))
 
 		attrs := []any{
 			"method", r.Method,
@@ -72,9 +94,21 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		if reqID := GetRequestID(r.Context()); reqID != "" {
 			attrs = append(attrs, "requestId", reqID)
 		}
-		if deviceID := r.URL.Query().Get("id"); deviceID != "" {
+		deviceID := r.URL.Query().Get("id")
+		if deviceID == "" {
+			deviceID = r.PathValue("id")
+		}
+		if deviceID != "" {
 			attrs = append(attrs, "deviceId", deviceID)
 		}
-		slog.InfoContext(r.Context(), "http request", attrs...)
+
+		if rec.statusCode >= http.StatusInternalServerError {
+			if carrier.err != nil {
+				attrs = append(attrs, "error", carrier.err)
+			}
+			slog.ErrorContext(r.Context(), "http request failed", attrs...)
+		} else {
+			slog.InfoContext(r.Context(), "http request", attrs...)
+		}
 	})
 }

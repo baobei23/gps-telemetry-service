@@ -331,13 +331,22 @@ func TestLoggingMiddleware(t *testing.T) {
 	})
 
 	logged := loggingMiddleware(inner)
-	req := httptest.NewRequest(http.MethodGet, "/?id=357565514527184", nil)
-	rec := httptest.NewRecorder()
 
-	logged.ServeHTTP(rec, req)
+	// Test 1: device ID from query parameter
+	req1 := httptest.NewRequest(http.MethodGet, "/?id=357565514527184", nil)
+	rec1 := httptest.NewRecorder()
+	logged.ServeHTTP(rec1, req1)
+	if rec1.Code != http.StatusCreated {
+		t.Fatalf("expected status 201, got %d", rec1.Code)
+	}
 
-	if rec.Code != http.StatusCreated {
-		t.Fatalf("expected status 201, got %d", rec.Code)
+	// Test 2: device ID from path parameter
+	req2 := httptest.NewRequest(http.MethodGet, "/api/devices/357565514527184/latest", nil)
+	req2.SetPathValue("id", "357565514527184")
+	rec2 := httptest.NewRecorder()
+	logged.ServeHTTP(rec2, req2)
+	if rec2.Code != http.StatusCreated {
+		t.Fatalf("expected status 201, got %d", rec2.Code)
 	}
 }
 
@@ -409,6 +418,21 @@ func TestPanicRecovery(t *testing.T) {
 	}
 	if res.Error != "Internal server error. Please try again later." {
 		t.Fatalf("unexpected error response: %q", res.Error)
+	}
+}
+
+func TestPanicRecovery_WithLoggingMiddleware(t *testing.T) {
+	panickingHandler := loggingMiddleware(recoveryMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		panic("panic through unified logger")
+	})))
+
+	req := httptest.NewRequest(http.MethodGet, "/panic-test", nil)
+	rec := httptest.NewRecorder()
+
+	panickingHandler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", rec.Code)
 	}
 }
 

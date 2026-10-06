@@ -35,31 +35,19 @@ func recoverer() {
 	exitCode := 0
 	var exitInfo any
 	rec := recover()
-	err, _ := rec.(error)
-	if err != nil {
-		exitCode = 1
-		exitInfo = err
-	} else if rec != nil {
+	if rec != nil {
 		exitCode = 2
 		exitInfo = rec
 	} else if exitErr != nil {
-		exitCode = 3
+		exitCode = 1
 		exitInfo = exitErr
 	}
 
-	// exiting without error is a clean exit
-	if exitErr == nil {
-		exitCode = 0
-	}
-
 	ctx := context.Background()
-	// logging this because we have info logs saying "listening to" various port numbers
-	// based on the server type (gRPC, HTTP etc.). But it's unclear *from the logs*
-	// if the server is up and running, if it exits for any reason
 	if exitCode == 0 {
-		slog.InfoContext(ctx, fmt.Sprintf("shutdown complete: %+v", exitInfo))
+		slog.InfoContext(ctx, "shutdown complete")
 	} else {
-		slog.ErrorContext(ctx, fmt.Sprintf("shutdown complete (exit: %d): %+v", exitCode, exitInfo))
+		slog.ErrorContext(ctx, "shutdown complete with failure", "exitCode", exitCode, "error", exitInfo)
 	}
 
 	os.Exit(exitCode)
